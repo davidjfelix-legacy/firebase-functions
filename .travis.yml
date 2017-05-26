@@ -11,7 +11,8 @@ env:
 before_script:
 - npm install -g firebase-tools
 script:
-- yarn test
+- cd functions
+- npm install
 before_deploy:
 - XZ_OPT=-9e tar cJf build.tar.xz functions
 deploy:
