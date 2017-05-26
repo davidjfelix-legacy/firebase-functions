@@ -14,6 +14,7 @@ script:
 - cd functions
 - npm install
 before_deploy:
+- cd ..
 - XZ_OPT=-9e tar cJf build.tar.xz functions
 deploy:
 - provider: releases
