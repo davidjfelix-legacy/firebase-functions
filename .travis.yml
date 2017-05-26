@@ -1,0 +1,31 @@
+language: node_js
+node_js:
+- node
+cache: yarn
+install:
+- npm install -g yarn
+- yarn
+env:
+  global:
+    secure: Lgpi236STZ3JO8ZeEv89f8UZV5NAci+2c11AxRkIm+gs/lKeUmZC4iAsvRGLO1Yp1NYx/aMUmwDn4XnOVEsB0gUNC3lStxtFIeZr7tG6dpZRlB35YR/tKujlI1A7Z33J9ZmKwJ3MPyzWVDm7t1m/AvmV2Izf7gt4iv5Smw5JT+WkvawTr5457433+C++5s74l0T0yJA/CyHV1XQjRdi9dhRFyijAd7hCH4fVNI1nskw/TwUXVQi/hX0iP2Y/3lZpb/sKHUuugSVIjIlYzivAnV4X4HxteBBdJzHUycOikSnZRX5vZqgC3sVvwEP3l3nB27LMV8Djax/jd3bkHflCcC3Cq6MAOHFAlDMbIRbFjzXpaJ8hZK8QtDfixGgfWpCaz5T7uDztW2UYbXEhIsSfdcn8zktzIzgqPUdZi+a8QCNQ8DVcXuRFroYwpPOiNig0cG4Msm8ccVoPyj+9gLSHA3LL8QYzoLeubaLzj+K43gMB3XupiQWpk8AcFJ4rKW7Xkke8rNZBV4qoAaDBZ8Fw1kEnk0nK2T4KGT5t+LpwoGyta5NSq9nhgXq1s9H63QtaBFNjIFVVNr0xxhg6kpo8jy3MgMJW58eelqJmoLExnHzAg1zKzCt8gII+Z+VVx2S7+1GMhKNaR+OMtEnX9F49se8nRN6Ch4CZTmz3B6nPYRM=
+before_script:
+- npm install -g firebase-tools
+script:
+- yarn test
+- yarn build
+before_deploy:
+- XZ_OPT=-9e tar cJf build.tar.xz ./
+deploy:
+- provider: releases
+  api_key:
+    secure: DZkvHCFBtys+/Bn1v8kzFDRCXq4SG2C8YBrThfy8NvXMDWaTqu3XARmqTA4kgLEZvPV3CVh1vrNNiHwiFwmq1J3uACqoDa2WNPqOFF8RED9FTqEawEmd3/ehqJ0NFQOcxbcpXOI/hYbMbDrBUYFn4C9vVJ/nXASzcKzhGyBHmXzRnofKy43MuOuukWJM8m/hwW0Mpfrjv1YJlOk3rwpivltHSDO79IHol8SA5gbj3Z0odYRXtIaj1hYREvUDfCcEzhgZS2VHCu5jSqjk7BvmrS2LV7DrW2e6osQOolGeFMMT0fHzZPocZKUNxvTOZjY38lJtr+Aok4/pUDQ9xVZr/Ouchiv++Dx0sDwt8otqtCXFvfi94uj+XWvQG57WOiFFPdgmGdKbxgqv8+jDWFtGdqU23QUJp84zCvioQo0Ge3YBbo/rgy0L5GyaSgbesoE1upHsazQ+YmNGnP1QbjoLCRzqr5QdTFjTXqpJsibdQvxdZaIQC93YF708PCq+2Qjy6ZVPQeh7YR3C9C55CfZva9MLFOvUtM/9OslprJR9vnXyH0THTP0vd9412IJs1yBc+VaE84nsWMswb5menzhBEkiV35V+/TcWUV/HmcpOZZofDWqF0krxeDHVvJnRDezSqm2fYnjyRVNPAJnnI67xkVvmDK9Ha7qGaDhj2ntiALM=
+  file: build.tar.xz
+  on:
+    tags: true
+    repo: iotv/firebase-functions
+- provider: script
+  script: firebase deploy --token "$FIREBASE_TOKEN" --only functions
+  skip_cleanup: true
+  on:
+    branch: alpha
+    repo: iotv/firebase-functions
