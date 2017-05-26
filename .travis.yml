@@ -13,7 +13,7 @@ before_script:
 script:
 - yarn test
 before_deploy:
-- XZ_OPT=-9e tar cJf build.tar.xz ./
+- XZ_OPT=-9e tar cJf build.tar.xz functions
 deploy:
 - provider: releases
   api_key:
