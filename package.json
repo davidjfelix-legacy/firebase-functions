@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/iotv/firebase-functions/issues"
   },
-  "homepage": "https://github.com/iotv/firebase-functions#readme"
+  "homepage": "https://github.com/iotv/firebase-functions#readme",
+  "dependencies": {
+    "firebase-admin": "^5.0.0"
+  }
 }
