@@ -1,6 +1,6 @@
-var functions = require('firebase-functions');
-var admin = require('firebase-admin');
-var PubSub = require('@google-cloud/pubsub');
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const PubSub = require('@google-cloud/pubsub');
 
 exports.rawVideoNotifier = functions.storage.object().onChange(event => {
   console.log(event);
@@ -26,4 +26,13 @@ exports.videoNotifier = functions.storage.object().onChange(event => {
   if (event.data.name.startsWith('videos/')) {
     console.log('A video to be added');
   }
+});
+
+exports.videos = functions.https.onRequest((req, resp) => {
+  console.log(req)
+  if (req.method !== 'GET') {
+    resp.status(405).send(); // TODO: error object?
+    return;
+  }
+
 });
