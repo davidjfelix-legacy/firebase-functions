@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const PubSub = require('@google-cloud/pubsub')
@@ -18,10 +19,84 @@ exports.defaultGroupMemberPermissions = functions.database.ref('/groups/{groupId
     ))
   })
 
+
+exports.roleAddNewPermission = functions.database.ref('/roles/{roleId}/permissions/{permission}')
+  .onCreate(event => {
+    const groupId = event.data.adminRef.parent.parent.child('group_id')
+    const groupMembersRef = event.data.adminRef.root.child(`/groups/${groupId}/members`)
+    const groupMembers = groupMembersRef.val()
+    Object.keys(groupMembers)
+      .map(memberId => {
+        groupMembers[memberId] = Object.assign(
+          _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
+          {
+            [event.params.roleId]: true
+          }
+        )
+      })
+    groupMembersRef.set(groupMembers)
+  })
+
+exports.roleGrantNewMemberPermissions = functions.database.ref('/roles/{roleId}/members/{memberId}')
+  .onCreate(event => {
+    const groupId = event.data.adminRef.parent.parent.child('group_id')
+    const groupMemberRef = event.data.adminRef.root.child(`/groups/${groupId}/members/${event.params.memberId}`)
+    const groupMember = groupMemberRef.val()
+    Object.keys(
+      _.get(
+        event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
+        'permissions',
+        {}
+      )
+    ).map((permission) => {
+      groupMember[permission] = Object.assign(
+        _.get(groupMember, permission, {}),
+        {
+          [event.params.roleId]: true
+        }
+      )
+    })
+  })
+
+exports.roleRemovePermission = functions.database.ref('/roles/{roleId}/permissions/{permission}')
+  .onDelete(event => {
+    const groupId = event.data.adminRef.parent.parent.child('group_id')
+    const groupMembersRef = event.data.adminRef.root.child(`/groups/${groupId}/members`)
+    const groupMembers = groupMembersRef.val()
+    Object.keys(groupMembers)
+      .map(memberId => {
+        groupMembers[memberId] = _.omit(
+          _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
+          event.params.roleId
+        )
+      })
+    groupMembersRef.set(groupMembers)
+  })
+
+exports.roleRevokeDeletedMemberPermissions = functions.database.ref('/roles/{roleId}/members/{memberId}')
+  .onDelete(event => {
+    const groupId = event.data.adminRef.parent.parent.child('group_id')
+    const groupMemberRef = event.data.adminRef.root.child(`/groups/${groupId}/members/${event.params.memberId}`)
+    const groupMember = groupMemberRef.val()
+    Object.keys(
+      _.get(
+        event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
+        'permissions',
+        {}
+      )
+    ).map((permission) => {
+      groupMember[permission] = _.omit(
+        _.get(groupMember, permission, {}),
+        event.params.roleId
+      )
+    })
+    groupMemberRef.set(groupMember)
+  })
+
 exports.rawVideoNotifier = functions.storage.object().onChange(event => {
   if (event.data.name.startsWith('raw-videos/')) {
     console.log('Raw video to be encoded')
-    var pubSub = PubSub()
+    const pubSub = PubSub()
     console.log(pubSub)
     pubSub.topic('raw-videos')
       .get(
