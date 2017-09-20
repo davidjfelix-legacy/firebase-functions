@@ -22,75 +22,128 @@ exports.defaultGroupMemberPermissions = functions.database.ref('/groups/{groupId
 
 exports.roleAddNewPermission = functions.database.ref('/roles/{roleId}/permissions/{permission}')
   .onCreate(event => {
-    const groupId = event.data.adminRef.parent.parent.child('group_id')
     const groupMembersRef = event.data.adminRef.root.child(`/groups/${groupId}/members`)
-    const groupMembers = groupMembersRef.val()
-    Object.keys(groupMembers)
-      .map(memberId => {
-        groupMembers[memberId] = Object.assign(
-          _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
+
+    let groupId
+    let groupMembers
+
+    Promise.all(
+      [
+        event.data.adminRef.parent.parent.child('group_id').on('value', (snapshot) => {
+          groupId = snapshot.val()
+        }),
+        groupMembersRef.on('value', (snapshot) => {
+          groupMembers = snapshot.val()
+        })
+      ]
+    ).then(() => {
+      Object.keys(groupMembers)
+        .map(memberId => {
+          groupMembers[memberId] = Object.assign(
+            _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
+            {
+              [event.params.roleId]: true
+            }
+          )
+        })
+      return groupMembersRef.set(groupMembers)
+    })
+  })
+
+exports.roleGrantNewMemberPermissions = functions.database.ref('/roles/{roleId}/members/{memberId}')
+  .onCreate(event => {
+    const groupMemberRef = event.data.adminRef.root.child(`/groups/${groupId}/members/${event.params.memberId}`)
+
+    let groupId
+    let groupMember
+
+    Promise.all(
+      [
+        event.data.adminRef.parent.parent.child('group_id').on('value', (snapshot) => {
+          groupId = snapshot.val()
+        }),
+        groupMemberRef.on('value', (snapshot) => {
+          groupMember = snapshot.val()
+        })
+      ]
+    ).then(() => {
+      Object.keys(
+        _.get(
+          event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
+          'permissions',
+          {}
+        )
+      ).map((permission) => {
+        groupMember[permission] = Object.assign(
+          _.get(groupMember, permission, {}),
           {
             [event.params.roleId]: true
           }
         )
       })
-    groupMembersRef.set(groupMembers)
-  })
-
-exports.roleGrantNewMemberPermissions = functions.database.ref('/roles/{roleId}/members/{memberId}')
-  .onCreate(event => {
-    const groupId = event.data.adminRef.parent.parent.child('group_id')
-    const groupMemberRef = event.data.adminRef.root.child(`/groups/${groupId}/members/${event.params.memberId}`)
-    const groupMember = groupMemberRef.val()
-    Object.keys(
-      _.get(
-        event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
-        'permissions',
-        {}
-      )
-    ).map((permission) => {
-      groupMember[permission] = Object.assign(
-        _.get(groupMember, permission, {}),
-        {
-          [event.params.roleId]: true
-        }
-      )
+      return groupMemberRef.set(groupMember)
     })
   })
 
 exports.roleRemovePermission = functions.database.ref('/roles/{roleId}/permissions/{permission}')
   .onDelete(event => {
-    const groupId = event.data.adminRef.parent.parent.child('group_id')
     const groupMembersRef = event.data.adminRef.root.child(`/groups/${groupId}/members`)
-    const groupMembers = groupMembersRef.val()
-    Object.keys(groupMembers)
-      .map(memberId => {
-        groupMembers[memberId] = _.omit(
-          _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
-          event.params.roleId
-        )
-      })
-    groupMembersRef.set(groupMembers)
+
+    let groupId
+    let groupMembers
+
+    Promise.all(
+      [
+        event.data.adminRef.parent.parent.child('group_id').on('value', (snapshot) => {
+          groupId = snapshot.val()
+        }),
+        groupMembersRef.on('value', (snapshot) => {
+          groupMembers = snapshot.val()
+        })
+      ]
+    ).then(() => {
+      Object.keys(groupMembers)
+        .map(memberId => {
+          groupMembers[memberId] = _.omit(
+            _.get(groupMembers, `${memberId}.${event.params.permission}`, {}),
+            event.params.roleId
+          )
+        })
+      return groupMembersRef.set(groupMembers)
+    })
   })
 
 exports.roleRevokeDeletedMemberPermissions = functions.database.ref('/roles/{roleId}/members/{memberId}')
   .onDelete(event => {
-    const groupId = event.data.adminRef.parent.parent.child('group_id')
     const groupMemberRef = event.data.adminRef.root.child(`/groups/${groupId}/members/${event.params.memberId}`)
-    const groupMember = groupMemberRef.val()
-    Object.keys(
-      _.get(
-        event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
-        'permissions',
-        {}
-      )
-    ).map((permission) => {
-      groupMember[permission] = _.omit(
-        _.get(groupMember, permission, {}),
-        event.params.roleId
-      )
+
+    let groupId
+    let groupMember
+
+    Promise.all(
+      [
+        event.data.adminRef.parent.parent.child('group_id').on('value', (snapshot) => {
+          groupId = snapshot.val()
+        }),
+        groupMemberRef.on('value', (snapshot) => {
+          groupMember = snapshot.val()
+        })
+      ]
+    ).then(() => {
+      Object.keys(
+        _.get(
+          event.data.adminRef.root.child(`/roles/${event.params.roleId}`).val(),
+          'permissions',
+          {}
+        )
+      ).map((permission) => {
+        groupMember[permission] = _.omit(
+          _.get(groupMember, permission, {}),
+          event.params.roleId
+        )
+      })
+      return groupMemberRef.set(groupMember)
     })
-    groupMemberRef.set(groupMember)
   })
 
 exports.rawVideoNotifier = functions.storage.object().onChange(event => {
