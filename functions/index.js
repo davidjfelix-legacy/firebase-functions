@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const flatten = require('flat')
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const PubSub = require('@google-cloud/pubsub')
@@ -129,11 +130,9 @@ exports.roleRevokeDeletedMemberPermissions = functions.database.ref('/roles/{rol
                   ))
                 })
                 console.log(groupMember)
-                return _.isEqual(
-                  _.omitBy(groupMember, _.isEmpty), {}
-                ) ?
-                  groupMemberRef.set(true)
-                  : groupMemberRef.set(groupMember)
+                return _.isEqual(_.omitBy(flatten(groupMember), _.isEmpty), {}) ?
+                  groupMemberRef.set(true) :
+                  groupMemberRef.set(groupMember)
               })
           })
       })
