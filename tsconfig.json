@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "target": "es5",
+    "outDir": "./build",
+    "types": ["node"],
+    "typeRoots": [ "../node_modules/@types" ],
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "lib": ["es6", "es2015", "esnext.asynciterable"],
+    "module": "commonjs"
+  }
+}
