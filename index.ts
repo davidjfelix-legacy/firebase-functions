@@ -57,7 +57,7 @@ export const roleGrantNewMemberPermissions = functions.database.ref('/roles/{rol
       await groupMemberRef.once('value')
     ).val()
 
-    const groupMember = _.isObject(groupMemberSnapshot.val()) ? groupMemberSnapshot.val() : {}
+    const groupMember = _.isObject(groupMemberSnapshot) ? groupMemberSnapshot : {}
 
     console.log(groupMember)
     Object.keys(
