@@ -3,7 +3,9 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "build": "npm run clean && tsc && cp package.json ./build && cp package-lock.json ./build && cp yarn.lock ./build && npm install --production --prefix build",
-    "clean": "rm -rf ./build"
+    "clean": "rm -rf ./build",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@google-cloud/pubsub": "^0.14.3",
@@ -12,7 +14,8 @@
     "firebase-admin": "~5.4.1",
     "firebase-functions": "^0.7.0",
     "flat": "^4.0.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "snyk": "^1.69.7"
   },
   "devDependencies": {
     "@types/express": "^4.0.37",
@@ -24,5 +27,6 @@
     "firebase-tools": "^3.12.0",
     "typescript": "^2.5.3"
   },
-  "private": true
+  "private": true,
+  "snyk": true
 }
