@@ -6,7 +6,7 @@
     "clean": "rm -rf ./build"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^0.14.3",
+    "@google-cloud/pubsub": "^0.16.4",
     "@google-cloud/storage": "^1.1.1",
     "express": "^4.15.3",
     "firebase-admin": "~5.4.1",
