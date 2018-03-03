@@ -8,7 +8,7 @@
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^0.14.3",
+    "@google-cloud/pubsub": "^0.15.0",
     "@google-cloud/storage": "^1.1.1",
     "express": "^4.15.3",
     "firebase-admin": "~5.5.0",
