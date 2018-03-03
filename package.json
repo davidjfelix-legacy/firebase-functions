@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.0.37",
-    "@types/firebase": "^2.4.32",
+    "@types/firebase": "^3.2.1",
     "@types/flat": "^0.0.28",
     "@types/google-cloud__storage": "^1.1.5",
     "@types/lodash": "^4.14.74",
